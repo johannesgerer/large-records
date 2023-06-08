@@ -30,6 +30,9 @@ module Data.Record.Anon.Internal.Core.Diff (
 
 import Data.IntMap (IntMap)
 import Data.Kind
+import Debug.Trace
+import System.IO.Unsafe
+  
 import Data.List.NonEmpty (NonEmpty(..), (<|))
 import Data.SOP.BasicFunctors
 import GHC.Exts (Any)
@@ -124,10 +127,11 @@ empty = Diff {
 get :: (Int, FieldName) -> Diff f -> Canonical f -> f Any
 get (i, f) Diff{..} c =
     case HashMap.lookup f diffNew of
-      Just xs -> NE.head xs                          -- inserted  in the diff
+      Just xs -> tr "new" $ NE.head xs                          -- inserted  in the diff
       Nothing -> case IntMap.lookup i diffUpd of
-                   Just x  -> x                      -- updated   in the diff
-                   Nothing -> Canon.getAtIndex c i   -- unchanged in the diff
+                   Just x  -> tr "upd" x                      -- updated   in the diff
+                   Nothing -> tr "can" $ Canon.getAtIndex c i   -- unchanged in the diff
+  where tr m x = unsafePerformIO $ x <$ print (m <> ", i: " <> show i <> ", f: " <> show f) 
 
 -- | Update existing field
 --

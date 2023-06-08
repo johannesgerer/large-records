@@ -3,4 +3,5 @@ dist-newstyle
 *.log
 unversioned
 .envrc
-settings.json
+settings.json.girenv
+.direnv
